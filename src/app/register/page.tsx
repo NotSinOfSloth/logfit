@@ -2,25 +2,25 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { signInWithEmailAndPassword } from "firebase/auth";
+import { createUserWithEmailAndPassword } from "firebase/auth";
 import { auth } from "@/lib/firebase";
 
 import { Flex, Box, Field, Input, Stack, Button, Text, Link, Center } from "@chakra-ui/react";
 import { toaster, Toaster } from "@/components/ui/toaster";
 
-function SimpleCard({
+function RegisterCard({
     email,
     setEmail,
     password,
     setPassword,
-    onLogin,
+    onRegister,
     loading,
 }: {
     email: string;
     setEmail: (email: string) => void;
     password: string;
     setPassword: (password: string) => void;
-    onLogin: () => void;
+    onRegister: () => void;
     loading: boolean;
 }) {
     return (
@@ -49,30 +49,25 @@ function SimpleCard({
                         </Field.Root>
                         <Toaster />
                         <Stack gap={10}>
-                            <Stack direction={{ base: "column", sm: "row" }} align="start" justify="space-between">
-                                <Text color="blue.400" fontSize={{ base: "sm", sm: "md" }}>
-                                    Forgot password?
-                                </Text>
-                            </Stack>
                             <Button
                                 bg="blue.400"
                                 color="white"
                                 _hover={{ bg: "blue.500" }}
-                                onClick={onLogin}
+                                onClick={onRegister}
                                 loading={loading}
                                 width="100%"
                                 size="lg"
                                 fontWeight="bold"
                             >
-                                Sign in
+                                Register
                             </Button>
                         </Stack>
                         <Stack pt={6}>
                             <Center>
                                 <Text>
-                                    Don't have an account?{" "}
-                                    <Link color="blue.400" href="/register">
-                                        Sign Up
+                                    Already have an account?{" "}
+                                    <Link color="blue.400" href="/login">
+                                        Log In
                                     </Link>
                                 </Text>
                             </Center>
@@ -84,20 +79,20 @@ function SimpleCard({
     );
 }
 
-export default function LoginPage() {
+export default function RegisterPage() {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [loading, setLoading] = useState(false);
     const router = useRouter();
 
-    const login = async () => {
+    const register = async () => {
         setLoading(true);
         try {
-            await signInWithEmailAndPassword(auth, email, password);
-            router.push("/home");
+            await createUserWithEmailAndPassword(auth, email, password);
+            router.push("/home"); // or redirect to login if you prefer
         } catch (error: any) {
             toaster.create({
-                title: `Incorrect password or username.`,
+                title: error.message || "Failed to register.",
                 type: "error",
             });
         } finally {
@@ -106,12 +101,12 @@ export default function LoginPage() {
     };
 
     return (
-        <SimpleCard
+        <RegisterCard
             email={email}
             setEmail={setEmail}
             password={password}
             setPassword={setPassword}
-            onLogin={login}
+            onRegister={register}
             loading={loading}
         />
     );
